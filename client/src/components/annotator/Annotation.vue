@@ -3,6 +3,7 @@
     @mouseenter="onMouseEnter"
     @mouseleave="onMouseLeave"
   >
+  <span v-for="error of annotation.errors" class="text-danger">{{ error.problem }}</span>
     <li
       v-show="showSideMenu"
       class="list-group-item btn btn-link btn-sm text-left"
@@ -62,11 +63,11 @@
     <ul v-show="showKeypoints" ref="collapse_keypoints"
         class="list-group keypoint-list">
       <li v-for="(kp, index) in keypointListView" :key="index"
-          :style="{'background-color': kp.backgroundColor}"
+          :style="{ 'background-color': kp.backgroundColor }"
           class="list-group-item text-left keypoint-item">
         <div>
           <i class="fa fa-map-marker keypoint-icon"
-              :style="{ color: kp.iconColor}"
+              :style="{ color: kp.iconColor }"
               />
         </div>
         <a
@@ -77,7 +78,7 @@
             color: 'white'
           }"
         >
-          <span> {{ kp.label }} </span> 
+          <span> {{ kp.label }} </span>
         </a>
         <i
           v-if="kp.visibility !== 0"
@@ -123,8 +124,8 @@
                 <label class="col-sm-3 col-form-label">Visibility</label>
                 <div class="col-sm-8">
                   <select v-model="keypoint.visibility" class="form-control">
-                    <option v-for="(desc, label) in visibilityOptions" 
-                      :key="label" :value="label" :selected="keypoint.visibility == label">{{desc}}</option>
+                    <option v-for="(desc, label) in visibilityOptions"
+                      :key="label" :value="label" :selected="keypoint.visibility == label">{{ desc }}</option>
                   </select>
                 </div>
               </div>
@@ -382,9 +383,9 @@ export default {
       };
       this.keypoints = new Keypoints(this.keypointEdges, this.keypointLabels,
         this.keypointColors, {
-          annotationId: this.annotation.id,
-          categoryName: this.$parent.category.name,
-        });
+        annotationId: this.annotation.id,
+        categoryName: this.$parent.category.name,
+      });
       this.keypoints.radius = this.scale * 6;
       this.keypoints.lineWidth = this.scale * 2;
 
@@ -448,7 +449,7 @@ export default {
       this.$parent.category.annotations.splice(this.index, 1);
       if (this.compoundPath != null) this.compoundPath.remove();
       if (this.keypoints != null) {
-        this.keypoints._keypoints.forEach( keypoint => {
+        this.keypoints._keypoints.forEach(keypoint => {
           this.keypoints.deleteKeypoint(keypoint);
         });
         this.keypoints.remove();
@@ -464,7 +465,7 @@ export default {
     },
     onAnnotationKeypointClick(labelIndex) {
       if (this.isKeypointLabeled(labelIndex)) {
-        this.keypoint.tag = [String(labelIndex+1)];
+        this.keypoint.tag = [String(labelIndex + 1)];
         this.currentKeypoint = this.keypoints._labelled[this.keypoint.tag];
       }
       if (this.isVisible) {
@@ -472,7 +473,7 @@ export default {
       }
     },
     onAnnotationKeypointSettingsClick(labelIndex) {
-      this.keypoint.tag = [String(labelIndex+1)];
+      this.keypoint.tag = [String(labelIndex + 1)];
       let indexLabel = parseInt(String(this.keypoint.tag));
       if (this.keypoints && indexLabel in this.keypoints._labelled) {
         let labelled = this.keypoints._labelled[indexLabel];
@@ -520,8 +521,8 @@ export default {
     },
     simplifyPath() {
       if (this.compoundPath != null && this.compoundPath.isEmpty() && this.keypoints.isEmpty()) {
-          this.deleteAnnotation();
-          return;
+        this.deleteAnnotation();
+        return;
       }
       let simplify = this.simplify;
 
@@ -574,7 +575,7 @@ export default {
         radius: this.scale * 6,
         onClick: event => {
           if (!["Select", "Keypoints"].includes(this.activeTool)) return;
-          
+
           let keypoint = event.target.keypoint;
           // Remove if already selected
           if (keypoint == this.currentKeypoint) {
@@ -623,7 +624,7 @@ export default {
 
       this.keypoints.addKeypoint(keypoint);
       this.isEmpty = this.compoundPath.isEmpty() && this.keypoints.isEmpty();
-      
+
       let unusedLabels = this.notUsedKeypointLabels;
       delete unusedLabels[String(label)];
       let unusedLabelKeys = Object.keys(unusedLabels);
@@ -661,7 +662,7 @@ export default {
       newCompound.onDoubleClick = this.compoundPath.onDoubleClick;
       newCompound.onClick = this.compoundPath.onClick;
       this.annotation.isbbox = isBBox;
-      
+
       if (undoable) this.createUndoAction("Unite");
 
       this.compoundPath.remove();
@@ -800,14 +801,14 @@ export default {
     activeTool(tool) {
       if (this.isCurrent) {
         this.session.tools.push(tool);
-      
+
         if (tool === "Keypoints") {
           if (!this.showKeypoints) {
             this.showKeypoints = true;
           }
           var labelIndex = -1;
-          for(let i=0; i < this.keypointLabels.length; ++i) {
-            
+          for (let i = 0; i < this.keypointLabels.length; ++i) {
+
             if (this.isKeypointLabeled(i)) {
               if (labelIndex < 0) {
                 labelIndex = i;
@@ -819,7 +820,7 @@ export default {
           }
 
           if (labelIndex > -1) {
-            this.keypoint.tag = [String(labelIndex+1)];
+            this.keypoint.tag = [String(labelIndex + 1)];
             this.currentKeypoint = this.keypoints._labelled[this.keypoint.tag];
             this.$emit("keypoint-click", labelIndex);
           }
@@ -911,7 +912,7 @@ export default {
     },
     keypointListView() {
       let listView = [];
-      for (let i=0; i < this.keypointLabels.length; ++i) {
+      for (let i = 0; i < this.keypointLabels.length; ++i) {
         let visibility = this.getKeypointVisibility(i);
         let iconColor = 'rgb(40, 42, 49)';
         if (visibility == 1) {
@@ -1024,6 +1025,7 @@ export default {
   margin: 0;
   padding: 3px;
 }
+
 .keypoint-icon {
   margin: 0;
   padding: 3px;
