@@ -237,6 +237,7 @@ def import_annotations(task_id, dataset_id, coco_json):
         area = annotation.get('area', 0)
         bbox = annotation.get('bbox', [0, 0, 0, 0])
         isbbox = annotation.get('isbbox', False)
+        errors = annotation.get('errors', [])
 
         progress += 1
         task.set_progress((progress / total_items) * 100, socket=socket)
@@ -289,6 +290,14 @@ def import_annotations(task_id, dataset_id, coco_json):
             annotation_model.update(deleted=False, isbbox=isbbox)
             task.info(
                 f"Annotation already exists (i:{image_id}, c:{category_id})")
+            
+        # Check if there are errors and add them
+        for error in errors:
+            problem = error.get('problem')
+            box_id = error.get('box_id')
+            keypoint_id = error.get('keypoint_id')
+            # if problem and box_id is not None and keypoint_id is not None:
+            annotation_model.add_error(problem=problem, box_id=box_id, keypoint_id=keypoint_id)
 
     for image_id in images_id:
         image_model = images_id[image_id]
@@ -309,5 +318,8 @@ def import_annotations(task_id, dataset_id, coco_json):
 
     task.set_progress(100, socket=socket)
 
+@shared_task
+def import_annotations_from_csv(task_id, dataset_id, csv_file):
+    pass
 
-__all__ = ["export_annotations", "import_annotations"]
+__all__ = ["export_annotations", "import_annotations", "import_annotations_from_csv"]

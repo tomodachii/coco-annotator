@@ -6,6 +6,7 @@ from mongoengine import *
 from .datasets import DatasetModel
 from .categories import CategoryModel
 from .events import Event
+from .annotation_errors import AnnotationErrorModel
 from flask_login import current_user
 
 
@@ -42,6 +43,8 @@ class AnnotationModel(DynamicDocument):
 
     milliseconds = IntField(default=0)
     events = EmbeddedDocumentListField(Event)
+
+    errors = EmbeddedDocumentListField(AnnotationErrorModel, default=[])
 
     def __init__(self, image_id=None, **data):
 
@@ -116,6 +119,24 @@ class AnnotationModel(DynamicDocument):
 
     def add_event(self, e):
         self.update(push__events=e)
+    
+    def add_error(self, problem, box_id, keypoint_id):
+        for error in self.errors:
+            if (error.problem == problem and
+                error.box_id == box_id and
+                error.keypoint_id == keypoint_id):
+                print(f"Error with problem '{problem}', box_id '{box_id}', and keypoint_id '{keypoint_id}' already exists.")
+                return error
+
+        new_error = AnnotationErrorModel(
+            problem=problem,
+            box_id=box_id,
+            keypoint_id=keypoint_id
+        )
+
+        self.errors.append(new_error)
+        self.save()
+        return new_error
 
 
 __all__ = ["AnnotationModel"]
