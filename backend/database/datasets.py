@@ -63,6 +63,25 @@ class DatasetModel(DynamicDocument):
             "id": task.id,
             "name": task.name
         }
+    
+    def import_csv(self, csv_file):
+
+        from workers.tasks import import_annotations_from_csv
+
+        task = TaskModel(
+            name="Import COCO csv into {}".format(self.name),
+            dataset_id=self.id,
+            group="Annotation Import"
+        )
+        task.save()
+
+        cel_task = import_annotations_from_csv.delay(task.id, self.id, csv_file)
+
+        return {
+            "celery_id": cel_task.id,
+            "id": task.id,
+            "name": task.name
+        }
 
     def export_coco(self, categories=None, style="COCO", with_empty_images=False):
 

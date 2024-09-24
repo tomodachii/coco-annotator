@@ -8,6 +8,7 @@ flask-mongoengine==0.9.5
 numpy
 cython
 scikit-image
+pandas==1.1.5
 requests
 google_images_download==2.5.0
 watchdog==0.8.3

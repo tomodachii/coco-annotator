@@ -1,10 +1,11 @@
-from flask import request
+from flask import request, jsonify
 from flask_restplus import Namespace, Resource, reqparse, inputs
 from flask_login import login_required, current_user
 from werkzeug.datastructures import FileStorage
 from mongoengine.errors import NotUniqueError
 from mongoengine.queryset.visitor import Q
 from threading import Thread
+import pandas as pd
 
 from google_images_download import google_images_download as gid
 
@@ -43,6 +44,9 @@ delete_data.add_argument('fully', default=False, type=bool,
 
 coco_upload = reqparse.RequestParser()
 coco_upload.add_argument('coco', location='files', type=FileStorage, required=True, help='Json coco')
+
+sheet_file_upload = reqparse.RequestParser()
+sheet_file_upload.add_argument('sheet_file', location='files', type=FileStorage, required=True, help='CSV or Excel file')
 
 export = reqparse.RequestParser()
 export.add_argument('categories', type=str, default=None, required=False, help='Ids of categories to export')
@@ -574,6 +578,31 @@ class DatasetCoco(Resource):
 
         return dataset.import_coco(json.load(coco))
 
+
+@api.route('/<int:dataset_id>/sheet_file')
+class DatasetSheetFile(Resource):
+
+    @api.expect(sheet_file_upload)
+    @login_required
+    def post(self, dataset_id):
+        """ Adds coco CSV or Excel formatted annotations to the dataset """
+        args = sheet_file_upload.parse_args()
+        sheet_file = args['sheet_file']
+
+        dataset = current_user.datasets.filter(id=dataset_id).first()
+        if dataset is None:
+            return {'message': 'Invalid dataset ID'}, 400
+        
+        try:
+            if sheet_file.filename.endswith('.csv'):
+                df = pd.read_csv(sheet_file)  # Load CSV file
+            else:
+                return {'message': f'Unsupported file format!'}, 400
+        except Exception as e:
+            return {'message': f'Error reading the file: {str(e)}'}, 500
+
+        first_10_rows = df.head(10).to_dict(orient='records')  # Convert the first 10 rows to a list of dictionaries
+        return jsonify(first_10_rows)
 
 @api.route('/coco/<int:import_id>')
 class DatasetCocoId(Resource):

@@ -104,3 +104,16 @@ services:
       - 5672:5672
     networks:
       - cocoannotator
+  
+  # Add Mongo Express for MongoDB management
+  mongo-express:
+    image: mongo-express
+    container_name: mongo_express
+    environment:
+      ME_CONFIG_MONGODB_SERVER: annotator_mongodb
+    ports:
+      - "8081:8081"
+    networks:
+      - cocoannotator
+    depends_on:
+      - database
