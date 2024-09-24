@@ -3,7 +3,7 @@
     @mouseenter="onMouseEnter"
     @mouseleave="onMouseLeave"
   >
-  <span v-for="error of annotation.errors" class="text-danger">{{ error.problem }}</span>
+  <!-- <span v-for="error of annotation.errors" class="text-danger">{{ error.problem }}</span> -->
     <li
       v-show="showSideMenu"
       class="list-group-item btn btn-link btn-sm text-left"
@@ -26,7 +26,7 @@
           class="btn btn-sm btn-link collapsed text-left annotation-text"
           :style="{
             float: 'left',
-            width: '70%',
+            width: '50%',
             color: isVisible ? 'white' : 'gray'
           }"
           aria-expanded="false"
@@ -57,6 +57,13 @@
         @click="deleteAnnotation"
         class="fa fa-trash-o annotation-icon"
         style="float:right"
+      />
+      <i
+        v-if="annotation.errors.length > 0"
+        class="fa fa-exclamation-triangle annotation-icon text-danger"
+        style="float:right"
+        aria-hidden="true"
+        v-tooltip.bottom="annotation.errors.map(err => err.problem).join(`\n`)"
       />
     </li>
 
